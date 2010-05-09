@@ -9,9 +9,9 @@ public class Actor {
 	{
 	}
 	
-	public void SetBitmapResource( BitmapResource _bitmap_array )
+	public void SetBitmapResource( BitmapResource _bitmap_resource )
 	{
-		bitmap_array = _bitmap_array;
+		bitmap_resource = _bitmap_resource;
 	}
 	
 	public void Update()
@@ -20,7 +20,7 @@ public class Actor {
 	
 	public void Draw( Canvas canvas )
 	{
-		Bitmap bitmap = bitmap_array.getBitmap(bitmap_index);
+		Bitmap bitmap = bitmap_resource.getBitmap(bitmap_index);
 		canvas.drawBitmap( bitmap, x - bitmap.getWidth()/2, y - bitmap.getHeight()/2, null );
 	}
 	
@@ -41,6 +41,6 @@ public class Actor {
 	public int w = 0;
 	public int h = 0;
 	
-	private BitmapResource bitmap_array;
+	private BitmapResource bitmap_resource;
 	public int bitmap_index = 0;
 }
