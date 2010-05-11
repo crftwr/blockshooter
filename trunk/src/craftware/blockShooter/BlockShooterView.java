@@ -522,6 +522,7 @@ public class BlockShooterView extends SurfaceView implements
 		/**
 		 * Draws current state of the game Canvas.
 		 */
+		/*
 		private void doDrawRunning(Canvas canvas) {
 
 			// decrement the far background
@@ -582,6 +583,7 @@ public class BlockShooterView extends SurfaceView implements
 					- mTimerShell.getWidth(), 0, null);
 
 		}
+		*/
 
 		private void setInitialGameState() {
 			mTimerLimit = TIMER_LIMIT;
@@ -638,6 +640,7 @@ public class BlockShooterView extends SurfaceView implements
 			}
 		}
 
+		/*
 		private void doDrawReady(Canvas canvas) {
 			canvas.drawBitmap(mTitleBG, 0, 0, null);
 		}
@@ -645,6 +648,7 @@ public class BlockShooterView extends SurfaceView implements
 		private void doDrawPlay(Canvas canvas) {
 			canvas.drawBitmap(mTitleBG2, 0, 0, null);
 		}
+		*/
 
 		/**
 		 * the heart of the worker bee
