@@ -4,6 +4,7 @@ import java.util.Random;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 
 import craftware.gameEngine.Actor;
 import craftware.gameEngine.BitmapResource;
@@ -29,9 +30,9 @@ public class BlockShooterFramework extends Framework
 			y += speed_y;
 			
 			if(x<0){ speed_x = Math.abs(speed_x); }
-			if(x>200){ speed_x = -Math.abs(speed_x); }
+			if(x>480){ speed_x = -Math.abs(speed_x); }
 			if(y<0){ speed_y = Math.abs(speed_y); }
-			if(y>200){ speed_y = -Math.abs(speed_y); }
+			if(y>272){ speed_y = -Math.abs(speed_y); }
 		}
 		
 		public int speed_x;
@@ -59,6 +60,8 @@ public class BlockShooterFramework extends Framework
 			actor.SetBitmapResource(test_bitmap);
 			AppendActor(actor);
 		}
+		
+		SetClearMode( true, Color.BLUE );
 	}
 	
 	public void Update()

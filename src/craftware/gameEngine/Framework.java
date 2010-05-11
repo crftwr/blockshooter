@@ -3,6 +3,7 @@ package craftware.gameEngine;
 import java.util.Vector;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 
 public class Framework
 {
@@ -21,6 +22,12 @@ public class Framework
 		actor_list.removeElement(actor);
 	}
 	
+	public void SetClearMode( boolean _enabled, int _color )
+	{
+		clear_enabled = _enabled;
+		clear_color = _color;
+	}
+	
 	public void Update()
 	{
 		for( int i=0 ; i<actor_list.size() ; ++i )
@@ -31,6 +38,11 @@ public class Framework
 
 	public void Draw(Canvas canvas)
 	{
+		if(clear_enabled)
+		{
+			canvas.drawColor(clear_color);
+		}
+		
 		for( int i=0 ; i<actor_list.size() ; ++i )
 		{
 			actor_list.elementAt(i).Draw(canvas);
@@ -38,4 +50,7 @@ public class Framework
 	}
 	
 	private Vector<Actor> actor_list; 
+
+	private boolean clear_enabled = true;
+	private int clear_color = Color.BLACK;
 }
