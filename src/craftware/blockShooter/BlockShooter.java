@@ -2,13 +2,15 @@ package craftware.blockShooter;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 
 import craftware.blockShooter.BlockShooterView.BlockShooterThread;
 
-public class BlockShooter extends Activity implements View.OnClickListener {
-
+public class BlockShooter extends Activity implements View.OnClickListener
+{
     /** A handle to the thread that's actually running the animation. */
 	private BlockShooterThread mBlockShooterThread;
 
@@ -67,5 +69,32 @@ public class BlockShooter extends Activity implements View.OnClickListener {
         {
             return mBlockShooterThread.doKeyUp(keyCode, msg);
         }
+    }
+    
+    @Override
+    public boolean onTouchEvent( MotionEvent event )
+    {
+        String action = "";
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            action = "ACTION_DOWN";
+            break;
+        case MotionEvent.ACTION_UP:
+            action = "ACTION_UP";
+            break;
+        case MotionEvent.ACTION_MOVE:
+            action = "ACTION_MOVE";
+            break;
+        case MotionEvent.ACTION_CANCEL:
+            action = "ACTION_CANCEL";
+            break;
+        }
+        
+        Log.v("MotionEvent",
+            "action = " + action + ", " +
+            "x = " + String.valueOf(event.getX()) + ", " +
+            "y = " + String.valueOf(event.getY()));
+        
+        return super.onTouchEvent(event);
     }
 }

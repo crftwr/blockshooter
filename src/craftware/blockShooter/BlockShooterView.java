@@ -89,7 +89,7 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 
 		private void doDraw(Canvas canvas)
 		{
-			framework.Draw(canvas);
+			framework.draw(canvas);
 		}
 
 		/**
@@ -102,7 +102,7 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 			{
 				Canvas c = null;
 				
-				framework.Update();
+				framework.update();
 
 				try
 				{
@@ -255,7 +255,7 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 			// synchronized to make sure these all change atomically
 			synchronized (mSurfaceHolder) 
 			{
-				framework.SetSurfaceSize(width,height);
+				framework.setSurfaceSize(width,height);
 			}
 		}
 
