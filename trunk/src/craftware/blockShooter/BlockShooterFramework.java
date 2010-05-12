@@ -9,6 +9,7 @@ import android.graphics.Color;
 import craftware.gameEngine.Actor;
 import craftware.gameEngine.BitmapResource;
 import craftware.gameEngine.Framework;
+import craftware.gameEngine.Sound;
 
 public class BlockShooterFramework extends Framework
 {
@@ -25,7 +26,7 @@ public class BlockShooterFramework extends Framework
 		}
 		
 		@Override
-		public void Update()
+		public void update()
 		{
 			x += speed_x;
 			y += speed_y;
@@ -33,7 +34,7 @@ public class BlockShooterFramework extends Framework
 			if(x<0){ speed_x = Math.abs(speed_x); }
 			if(x>virtual_surface_width){ speed_x = -Math.abs(speed_x); }
 			if(y<0){ speed_y = Math.abs(speed_y); }
-			if(y>virtual_surface_height){ speed_y = -Math.abs(speed_y); }
+			if(y>virtual_surface_height){ speed_y = -Math.abs(speed_y); sound_taihou.play(); }
 		}
 		
 		public int speed_x;
@@ -55,22 +56,25 @@ public class BlockShooterFramework extends Framework
 		
 		BitmapResource test_bitmap = new BitmapResource(res, test_bitmap_id_list);
 		
+		sound_taihou = new Sound( context, R.raw.taihou );
+		
 		for( int i=0 ; i<10 ; ++i )
 		{
 			TestActor actor = new TestActor();
-			actor.SetBitmapResource(test_bitmap);
-			AppendActor(actor);
+			actor.setBitmapResource(test_bitmap);
+			appendActor(actor);
 		}
 		
-		SetClearMode( true, Color.BLUE );
+		setClearMode( true, Color.BLUE );
 	}
 	
 	@Override
-	public void Update()
+	public void update()
 	{
-		super.Update();
+		super.update();
 	}
 	
 	public Random random;
-
+	
+	private Sound sound_taihou;
 }

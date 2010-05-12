@@ -17,48 +17,48 @@ public class Framework
 		delta_time_msec = 0;
 	}
 	
-	public void AppendActor( Actor actor )
+	public void appendActor( Actor actor )
 	{
 		actor_list.addElement(actor);
 	}
 	
-	public void RemoveActor( Actor actor )
+	public void removeActor( Actor actor )
 	{
 		actor_list.removeElement(actor);
 	}
 	
-	public void SetClearMode( boolean _enabled, int _color )
+	public void setClearMode( boolean _enabled, int _color )
 	{
 		clear_enabled = _enabled;
 		clear_color = _color;
 	}
 
-	public void SetSurfaceSize(int width, int height)
+	public void setSurfaceSize(int width, int height)
 	{
 		surface_width = width;
 		surface_height = height;
 	}
 	
-	public void SetVirtualSurfaceSize(int width, int height)
+	public void setVirtualSurfaceSize(int width, int height)
 	{
 		virtual_surface_width = width;
 		virtual_surface_height = height;
 	}
 	
-	public long DeltaTimeMsec()
+	public long deltaTimeMsec()
 	{
 		return delta_time_msec;
 	}
 	
-	public void Update()
+	public void update()
 	{
 		for( int i=0 ; i<actor_list.size() ; ++i )
 		{
-			actor_list.elementAt(i).Update();
+			actor_list.elementAt(i).update();
 		}
 	}
 
-	public void Draw(Canvas canvas)
+	public void draw(Canvas canvas)
 	{
 		if(clear_enabled)
 		{
@@ -69,7 +69,7 @@ public class Framework
 		
 		for( int i=0 ; i<actor_list.size() ; ++i )
 		{
-			actor_list.elementAt(i).Draw(canvas);
+			actor_list.elementAt(i).draw(canvas);
 		}
 
 		prev_time_msec = current_time_msec; 
@@ -78,7 +78,7 @@ public class Framework
 		delta_time_msec = Math.max( delta_time_msec, 1);
 		delta_time_msec = Math.min( delta_time_msec, 100);
 		
-        Log.d( "gameEngine", "delta:" + delta_time_msec );
+        //Log.d( "gameEngine", "delta:" + delta_time_msec );
 	}
 	
 	private Vector<Actor> actor_list; 

@@ -9,28 +9,28 @@ public class Actor {
 	{
 	}
 	
-	public void SetBitmapResource( BitmapResource _bitmap_resource )
+	public void setBitmapResource( BitmapResource _bitmap_resource )
 	{
 		bitmap_resource = _bitmap_resource;
 	}
 	
-	public void Update()
+	public void update()
 	{
 	}
 	
-	public void Draw( Canvas canvas )
+	public void draw( Canvas canvas )
 	{
 		Bitmap bitmap = bitmap_resource.getBitmap(bitmap_index);
 		canvas.drawBitmap( bitmap, x - bitmap.getWidth()/2, y - bitmap.getHeight()/2, null );
 	}
 	
-	public void SetPosition( int _x, int _y )
+	public void setPosition( int _x, int _y )
 	{
 		x = _x;
 		y = _y;
 	}
 	
-	public void SetSize( int _w, int _h )
+	public void setSize( int _w, int _h )
 	{
 		w = _w;
 		h = _h;
