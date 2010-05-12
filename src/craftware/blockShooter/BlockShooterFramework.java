@@ -24,15 +24,16 @@ public class BlockShooterFramework extends Framework
 			speed_y = random.nextInt() % 10 - 5;
 		}
 		
+		@Override
 		public void Update()
 		{
 			x += speed_x;
 			y += speed_y;
 			
 			if(x<0){ speed_x = Math.abs(speed_x); }
-			if(x>480){ speed_x = -Math.abs(speed_x); }
+			if(x>virtual_surface_width){ speed_x = -Math.abs(speed_x); }
 			if(y<0){ speed_y = Math.abs(speed_y); }
-			if(y>272){ speed_y = -Math.abs(speed_y); }
+			if(y>virtual_surface_height){ speed_y = -Math.abs(speed_y); }
 		}
 		
 		public int speed_x;
@@ -64,10 +65,12 @@ public class BlockShooterFramework extends Framework
 		SetClearMode( true, Color.BLUE );
 	}
 	
+	@Override
 	public void Update()
 	{
 		super.Update();
 	}
 	
 	public Random random;
+
 }
