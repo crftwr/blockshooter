@@ -1,12 +1,8 @@
 package craftware.gameEngine;
 
-import java.util.Vector;
-
-import craftware.blockShooter.R;
-
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.content.res.Resources;
 
 public class BitmapResource {
 	

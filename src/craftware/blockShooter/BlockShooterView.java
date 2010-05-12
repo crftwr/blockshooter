@@ -1,5 +1,9 @@
 package craftware.blockShooter;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -19,31 +23,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-public class BlockShooterView extends SurfaceView implements
-		SurfaceHolder.Callback {
-
+public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callback
+{
 	// the number of asteroids that must be destroyed
 	public static final int mSuccessThreshold = 50;
 
 	// used to calculate level for mutes and trigger clip
 	public int mHitStreak = 0;
 
-	// total number asteroids you need to hit.
-	public int mHitTotal = 0;
-
 	// which music bed is currently playing?
 	public int mCurrentBed = 0;
-
-	// a lazy graphic fudge for the initial title splash
-	private Bitmap mTitleBG;
-
-	private Bitmap mTitleBG2;
 
 	/**
 	 * Base class for any external event passed to the BlockShooterThread. This
@@ -83,8 +72,7 @@ public class BlockShooterView extends SurfaceView implements
 		/**
 		 * Simple constructor to make populating this event easier.
 		 */
-		public JetGameEvent(JetPlayer player, short segment, byte track,
-				byte channel, byte controller, byte value) {
+		public JetGameEvent(JetPlayer player, short segment, byte track, byte channel, byte controller, byte value) {
 			this.player = player;
 			this.segment = segment;
 			this.track = track;
@@ -115,11 +103,6 @@ public class BlockShooterView extends SurfaceView implements
 		public static final int STATE_PAUSE = 2;
 		public static final int STATE_RUNNING = 3;
 
-		// how many frames per beat? The basic animation can be changed for
-		// instance to 3/4 by changing this to 3.
-		// untested is the impact on other parts of game logic for non 4/4 time.
-		private static final int ANIMATION_FRAMES_PER_BEAT = 4;
-
 		public boolean mInitialized = false;
 
 		/** Queue for GameEvents */
@@ -140,23 +123,10 @@ public class BlockShooterView extends SurfaceView implements
 		// start, play, running, lose are the states we use
 		public int mState;
 
-		// has laser been fired and for how long?
-		// user for fx logic on laser fire
-		boolean mLaserOn = false;
-
-		long mLaserFireTime = 0;
-
-		/** The drawable to use as the far background of the animation canvas */
-		private Bitmap mBackgroundImageFar;
-
-		/** The drawable to use as the close background of the animation canvas */
-		private Bitmap mBackgroundImageNear;
-
 		// JET info: event IDs within the JET file.
 		// JET info: in this game 80 is used for sending asteroid across the
 		// screen
 		// JET info: 82 is used as game time for 1/4 note beat.
-		private final byte NEW_ASTEROID_EVENT = 80;
 		private final byte TIMER_EVENT = 82;
 
 		// used to track beat for synch of mute/unmute actions
@@ -173,22 +143,6 @@ public class BlockShooterView extends SurfaceView implements
 
 		// hit animation
 		private Bitmap[] mExplosions = new Bitmap[4];
-
-		private Bitmap mTimerShell;
-
-		private Bitmap mLaserShot;
-
-		// used to save the beat event system time.
-		private long mLastBeatTime;
-
-		private long mPassedTime;
-
-		// how much do we move the asteroids per beat?
-		private int mPixelMoveX = 25;
-
-		// the asteroid send events are generated from the Jet File.
-		// but which land they start in is random.
-		private Random mRandom = new Random();
 
 		// JET info: the star of our show, a reference to the JetPlayer object.
 		private JetPlayer mJet = null;
@@ -229,30 +183,7 @@ public class BlockShooterView extends SurfaceView implements
 		 */
 		private int mCanvasWidth = 1;
 
-		// used to track the picture to draw for ship animation
-		private int mShipIndex = 0;
-
-		// stores all of the asteroid objects in order
-		private Vector<Block> mDangerWillRobinson;
-
-		private Vector<Particle> mExplosion;
-
 		private BlockShooterFramework framework;
-
-		// right to left scroll tracker for near and far BG
-		private int mBGFarMoveX = 0;
-		private int mBGNearMoveX = 0;
-
-		// how far up (close to top) jet boy can fly
-		private int mBlockShooterYMin = 40;
-		private int mBlockShooterX = 0;
-		private int mBlockShooterY = 0;
-
-		// this is the pixel position of the laser beam guide.
-		private int mAsteroidMoveLimitX = 110;
-
-		// how far up asteroid can be painted
-		private int mAsteroidMinY = 40;
 
 		Resources mRes;
 
@@ -353,21 +284,14 @@ public class BlockShooterView extends SurfaceView implements
 
 			setInitialGameState();
 
+			/*
 			mTitleBG = BitmapFactory
 					.decodeResource(mRes, R.drawable.title_hori);
+			*/
 
 			// load background image as a Bitmap instead of a Drawable b/c
 			// we don't need to transform it and it's faster to draw this
 			// way...thanks lunar lander :)
-
-			// two background since we want them moving at different speeds
-			mBackgroundImageFar = BitmapFactory.decodeResource(mRes,
-					R.drawable.background_a);
-
-			mLaserShot = BitmapFactory.decodeResource(mRes, R.drawable.laser);
-
-			mBackgroundImageNear = BitmapFactory.decodeResource(mRes,
-					R.drawable.background_b);
 
 			mShipFlying[0] = BitmapFactory.decodeResource(mRes,
 					R.drawable.ship2_1);
@@ -382,9 +306,6 @@ public class BlockShooterView extends SurfaceView implements
 			mBeam[1] = BitmapFactory.decodeResource(mRes, R.drawable.intbeam_2);
 			mBeam[2] = BitmapFactory.decodeResource(mRes, R.drawable.intbeam_3);
 			mBeam[3] = BitmapFactory.decodeResource(mRes, R.drawable.intbeam_4);
-
-			mTimerShell = BitmapFactory.decodeResource(mRes,
-					R.drawable.int_timer);
 
 			// I wanted them to rotate in a certain way
 			// so I loaded them backwards from the way created.
@@ -585,26 +506,21 @@ public class BlockShooterView extends SurfaceView implements
 		}
 		*/
 
-		private void setInitialGameState() {
+		private void setInitialGameState()
+		{
 			mTimerLimit = TIMER_LIMIT;
-
-			mBlockShooterY = mBlockShooterYMin;
 
 			// set up jet stuff
 			initializeJetPlayer();
 
 			mTimer = new Timer();
 
-			mDangerWillRobinson = new Vector<Block>();
-
-			mExplosion = new Vector<Particle>();
-
 			mInitialized = true;
 
 			mHitStreak = 0;
-			mHitTotal = 0;
 		}
 
+		/*
 		private void doAsteroidAnimation(Canvas canvas) {
 			if ((mDangerWillRobinson == null | mDangerWillRobinson.size() == 0)
 					&& (mExplosion != null && mExplosion.size() == 0))
@@ -639,6 +555,7 @@ public class BlockShooterView extends SurfaceView implements
 						% mExplosions.length], ex.mDrawX, ex.mDrawY, null);
 			}
 		}
+		*/
 
 		/*
 		private void doDrawReady(Canvas canvas) {
@@ -673,8 +590,6 @@ public class BlockShooterView extends SurfaceView implements
 						mJetPlaying = true;
 
 					}
-
-					mPassedTime = System.currentTimeMillis();
 
 					// kick off the timer task for counter update if not already
 					// initialized
@@ -735,12 +650,14 @@ public class BlockShooterView extends SurfaceView implements
 					mKeyContext = processKeyEvent((KeyGameEvent) event,
 							mKeyContext);
 
+					/*
 					// Update laser state. Having this here allows the laser to
 					// be triggered right when the key is
 					// pressed. If we comment this out the laser will only be
 					// turned on when updateLaser is called
 					// when processing a timer event below.
 					updateLaser(mKeyContext);
+					*/
 
 				}
 				// JET events trigger a state update
@@ -748,15 +665,21 @@ public class BlockShooterView extends SurfaceView implements
 					JetGameEvent jetEvent = (JetGameEvent) event;
 
 					// Only update state on a timer event
-					if (jetEvent.value == TIMER_EVENT) {
+					if (jetEvent.value == TIMER_EVENT)
+					{
+						/*
 						// Note the time of the last beat
 						mLastBeatTime = System.currentTimeMillis();
+						*/
 
+						/*
 						// Update laser state, turning it on if a key has been
 						// pressed or off if it has been
 						// on for too long.
 						updateLaser(mKeyContext);
+						*/
 
+						/*
 						// Update explosions before we update asteroids because
 						// updateAsteroids may add
 						// new explosions that we do not want updated until next
@@ -765,6 +688,7 @@ public class BlockShooterView extends SurfaceView implements
 
 						// Update asteroid positions, hit status and animations
 						updateAsteroids(mKeyContext);
+						*/
 					}
 
 					processJetEvent(jetEvent.player, jetEvent.segment,
@@ -812,6 +736,7 @@ public class BlockShooterView extends SurfaceView implements
 		 * This method updates the laser status based on user input and shot
 		 * duration
 		 */
+		/*
 		protected void updateLaser(Object inputContext) {
 			// Lookup the time of the fire event if there is one
 			long keyTime = inputContext == null ? 0
@@ -848,10 +773,12 @@ public class BlockShooterView extends SurfaceView implements
 				mJet.setMuteFlag(23, false, false);
 			}
 		}
+		*/
 
 		/**
 		 * Update asteroid state including position and laser hit status.
 		 */
+		/*
 		protected void updateAsteroids(Object inputContext) {
 			if (mDangerWillRobinson == null | mDangerWillRobinson.size() == 0)
 				return;
@@ -911,11 +838,13 @@ public class BlockShooterView extends SurfaceView implements
 				}
 			}
 		}
+		*/
 
 		/**
 		 * This method updates explosion animation and removes them once they
 		 * have completed.
 		 */
+		/*
 		protected void updateExplosions(Object inputContext) {
 			if (mExplosion == null | mExplosion.size() == 0)
 				return;
@@ -934,6 +863,7 @@ public class BlockShooterView extends SurfaceView implements
 				}
 			}
 		}
+		*/
 
 		/**
 		 * This method handles the state updates that can be caused by JET
@@ -946,10 +876,12 @@ public class BlockShooterView extends SurfaceView implements
 			// " chan=" + channel
 			// + " cntrlr=" + controller + " val=" + value);
 
+			/*
 			// Check for an event that triggers a new asteroid
 			if (value == NEW_ASTEROID_EVENT) {
 				doAsteroidCreation();
 			}
+			*/
 
 			mBeatCount++;
 
@@ -1048,6 +980,7 @@ public class BlockShooterView extends SurfaceView implements
 			}
 		}
 
+		/*
 		private void doAsteroidCreation() {
 			// Log.d(TAG, "asteroid created");
 
@@ -1064,6 +997,7 @@ public class BlockShooterView extends SurfaceView implements
 
 			mDangerWillRobinson.add(_as);
 		}
+		*/
 
 		/**
 		 * Used to signal the thread whether it should be running or not.
@@ -1124,25 +1058,11 @@ public class BlockShooterView extends SurfaceView implements
 					mState = state;
 				}
 
-				if (mState == STATE_PLAY) {
-					Resources res = mContext.getResources();
-					mBackgroundImageFar = BitmapFactory.decodeResource(res,
-							R.drawable.background_a);
-
-					// don't forget to resize the background image
-					mBackgroundImageFar = Bitmap.createScaledBitmap(
-							mBackgroundImageFar, mCanvasWidth * 2,
-							mCanvasHeight, true);
-
-					mBackgroundImageNear = BitmapFactory.decodeResource(res,
-							R.drawable.background_b);
-
-					// don't forget to resize the background image
-					mBackgroundImageNear = Bitmap.createScaledBitmap(
-							mBackgroundImageNear, mCanvasWidth * 2,
-							mCanvasHeight, true);
-
-				} else if (mState == STATE_RUNNING) {
+				if (mState == STATE_PLAY)
+				{
+				}
+				else if (mState == STATE_RUNNING)
+				{
 					// When we enter the running state we should clear any old
 					// events in the queue
 					mEventQueue.clear();
@@ -1151,7 +1071,6 @@ public class BlockShooterView extends SurfaceView implements
 					// pressed when it isn't
 					mKeyContext = null;
 				}
-
 			}
 		}
 
@@ -1174,19 +1093,13 @@ public class BlockShooterView extends SurfaceView implements
 		}
 
 		/* Callback invoked when the surface dimensions change. */
-		public void setSurfaceSize(int width, int height) {
+		public void setSurfaceSize(int width, int height)
+		{
 			// synchronized to make sure these all change atomically
-			synchronized (mSurfaceHolder) {
+			synchronized (mSurfaceHolder) 
+			{
 				mCanvasWidth = width;
 				mCanvasHeight = height;
-
-				// don't forget to resize the background image
-				mBackgroundImageFar = Bitmap.createScaledBitmap(
-						mBackgroundImageFar, width * 2, height, true);
-
-				// don't forget to resize the background image
-				mBackgroundImageNear = Bitmap.createScaledBitmap(
-						mBackgroundImageNear, width * 2, height, true);
 			}
 		}
 
@@ -1348,7 +1261,8 @@ public class BlockShooterView extends SurfaceView implements
 	 * @param context
 	 * @param attrs
 	 */
-	public BlockShooterView(Context context, AttributeSet attrs) {
+	public BlockShooterView(Context context, AttributeSet attrs)
+	{
 		super(context, attrs);
 
 		// register our interest in hearing about changes to our surface
@@ -1372,6 +1286,7 @@ public class BlockShooterView extends SurfaceView implements
 
 						mTextView.setVisibility(View.VISIBLE);
 
+						/*
 						Log.d(TAG, "the total was " + mHitTotal);
 
 						if (mHitTotal >= mSuccessThreshold) {
@@ -1380,6 +1295,7 @@ public class BlockShooterView extends SurfaceView implements
 							mTextView.setText("Sorry, You Lose! You got "
 									+ mHitTotal + ". You need 50 to win.");
 						}
+						*/
 
 						mTimerView.setText("1:12");
 						mTextView.setHeight(20);
@@ -1400,7 +1316,8 @@ public class BlockShooterView extends SurfaceView implements
 	 * 
 	 * @param tv
 	 */
-	public void setTimerView(TextView tv) {
+	public void setTimerView(TextView tv)
+	{
 		mTimerView = tv;
 	}
 
@@ -1409,8 +1326,10 @@ public class BlockShooterView extends SurfaceView implements
 	 * focus lost. e.g. user switches to take a call.
 	 */
 	@Override
-	public void onWindowFocusChanged(boolean hasWindowFocus) {
-		if (!hasWindowFocus) {
+	public void onWindowFocusChanged(boolean hasWindowFocus)
+	{
+		if (!hasWindowFocus)
+		{
 			if (thread != null)
 				thread.pause();
 
@@ -1422,24 +1341,27 @@ public class BlockShooterView extends SurfaceView implements
 	 * 
 	 * @return the animation thread
 	 */
-	public BlockShooterThread getThread() {
+	public BlockShooterThread getThread()
+	{
 		return thread;
 	}
 
 	/* Callback invoked when the surface dimensions change. */
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+	{
 		thread.setSurfaceSize(width, height);
 	}
 
-	public void surfaceCreated(SurfaceHolder arg0) {
+	public void surfaceCreated(SurfaceHolder arg0)
+	{
 		// start the thread here so that we don't busy-wait in run()
 		// waiting for the surface to be created
 		thread.setRunning(true);
 		thread.start();
 	}
 
-	public void surfaceDestroyed(SurfaceHolder arg0) {
+	public void surfaceDestroyed(SurfaceHolder arg0)
+	{
 		boolean retry = true;
 		thread.setRunning(false);
 		while (retry) {
