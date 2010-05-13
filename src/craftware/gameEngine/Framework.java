@@ -10,11 +10,15 @@ public class Framework
 {
 	public Framework()
 	{
+		Log.d( "gameEngine", "construct Framework ..." );
+		
 		actor_list = new Vector<Actor>();
 
 		current_time_msec = System.currentTimeMillis();
 		prev_time_msec = current_time_msec;
 		delta_time_msec = 0;
+
+		Log.d( "gameEngine", "construct Framework done." );
 	}
 	
 	public void appendActor( Actor actor )
