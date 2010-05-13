@@ -11,10 +11,8 @@ import craftware.blockShooter.BlockShooterView.BlockShooterThread;
 
 public class BlockShooter extends Activity implements View.OnClickListener
 {
-    /** A handle to the thread that's actually running the animation. */
 	private BlockShooterThread mBlockShooterThread;
 
-    /** A handle to the View in which the game is running. */
     private BlockShooterView mBlockShooterView;
 
 	/** Called when the activity is first created. */
