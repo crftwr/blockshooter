@@ -72,8 +72,11 @@ public class BlockShooter extends Activity implements View.OnClickListener
     @Override
     public boolean onTouchEvent( MotionEvent event )
     {
-        String action = "";
-        switch (event.getAction()) {
+        mBlockShooterThread.doTouchEvent( event );
+
+    	String action = "";
+        switch (event.getAction())
+        {
         case MotionEvent.ACTION_DOWN:
             action = "ACTION_DOWN";
             break;
