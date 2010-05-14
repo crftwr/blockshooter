@@ -54,7 +54,7 @@ public class BlockShooterFramework extends Framework
 			R.drawable.asteroid04,
 		};
 		
-		BitmapResource test_bitmap = new BitmapResource(res, test_bitmap_id_list);
+		test_bitmap = new BitmapResource(res, test_bitmap_id_list);
 		
 		sound_taihou = new Sound( context, R.raw.taihou );
 		
@@ -71,10 +71,18 @@ public class BlockShooterFramework extends Framework
 	@Override
 	public void update()
 	{
+		if( input.key.up_pressed )
+		{
+			TestActor actor = new TestActor();
+			actor.setBitmapResource(test_bitmap);
+			appendActor(actor);
+		}
+		
 		super.update();
 	}
 	
 	public Random random;
 	
+	private BitmapResource test_bitmap;
 	private Sound sound_taihou;
 }

@@ -49,17 +49,28 @@ public class Framework
 		virtual_surface_height = height;
 	}
 	
-	public long deltaTimeMsec()
+	public void setBaseFPS( int _base_fps )
 	{
-		return delta_time_msec;
+		base_fps = _base_fps;
+		frame_msec = 1000.0f / base_fps;
 	}
 	
 	public void update()
+	{
+		for( ; accumulated_msec>0.0f ; accumulated_msec-=frame_msec )
+		{
+			updateFrame();
+		}
+	}
+	
+	public void updateFrame()
 	{
 		for( int i=0 ; i<actor_list.size() ; ++i )
 		{
 			actor_list.elementAt(i).update();
 		}
+		
+		input.key.clearPressedReleased();
 	}
 
 	public void draw(Canvas canvas)
@@ -81,9 +92,12 @@ public class Framework
 		delta_time_msec = current_time_msec - prev_time_msec;
 		delta_time_msec = Math.max( delta_time_msec, 1);
 		delta_time_msec = Math.min( delta_time_msec, 100);
+		accumulated_msec += delta_time_msec; 
 		
         //Log.d( "gameEngine", "delta:" + delta_time_msec );
 	}
+
+	public Input input = new Input();
 	
 	private Vector<Actor> actor_list; 
 	
@@ -99,4 +113,8 @@ public class Framework
 	private long current_time_msec;
 	private long prev_time_msec;
 	protected long delta_time_msec;
+	
+	private int base_fps = 30;
+	private float frame_msec = 1000.0f / base_fps;
+	private float accumulated_msec = 0.0f;
 }

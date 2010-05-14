@@ -6,15 +6,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callback
 {
-	/**
-	 * Base class for any external event passed to the BlockShooterThread. This
-	 * can include user input, system events, network input, etc.
-	 */
 	class GameEvent
 	{
 		public GameEvent()
@@ -25,15 +22,8 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 		long eventTime;
 	}
 
-	/**
-	 * A GameEvent subclass for key based user input. Values are those used by
-	 * the standard onKey
-	 */
 	class KeyGameEvent extends GameEvent
 	{
-		/**
-		 * Simple constructor to make populating this event easier.
-		 */
 		public KeyGameEvent(int keyCode, boolean up, KeyEvent msg)
 		{
 			this.keyCode = keyCode;
@@ -46,6 +36,16 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 		public boolean up;
 	}
 
+	class TouchGameEvent extends GameEvent
+	{
+		public TouchGameEvent( MotionEvent _event )
+		{
+			event = _event;
+		}
+
+		public MotionEvent event;
+	}
+
 	// JET info: the BlockShooterThread receives all the events from the JET
 	// player
 	// JET info: through the OnJetEventListener interface.
@@ -56,15 +56,6 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 
 		/** Context for processKey to maintain state accross frames * */
 		protected Object mKeyContext = null;
-
-		// the timer display in seconds
-		public int mTimerLimit;
-
-		// used for internal timing logic.
-		public final int TIMER_LIMIT = 72;
-
-		// start, play, running, lose are the states we use
-		public int mState;
 
 		/** Handle to the surface manager object we interact with */
 		private SurfaceHolder mSurfaceHolder;
@@ -92,97 +83,56 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 			framework.draw(canvas);
 		}
 
-		/**
-		 * the heart of the worker bee
-		 */
 		public void run()
 		{
-			// while running do stuff in this loop...bzzz!
 			while (mRun)
 			{
-				Canvas c = null;
+				pollGameEvent();
 				
 				framework.update();
-
-				try
-				{
-					c = mSurfaceHolder.lockCanvas(null);
-					// synchronized (mSurfaceHolder) {
-					doDraw(c);
-					// }
-				} 
-				finally 
-				{
-					// do this in a finally so that if an exception is thrown
-					// during the above, we don't leave the Surface in an
-					// inconsistent state
-					if (c != null) 
-					{
-						mSurfaceHolder.unlockCanvasAndPost(c);
-					}
-				}// end finally block
-			}// end while mrun block
+				
+				draw();
+			}
 		}
 
-		/**
-		 * This method handles updating the model of the game state. No
-		 * rendering is done here only processing of inputs and update of state.
-		 * This includes positons of all game objects (asteroids, player,
-		 * explosions), their state (animation frame, hit), creation of new
-		 * objects, etc.
-		 */
-		protected void updateGameState()
+		protected void pollGameEvent()
 		{
 			// Process any game events and apply them
 			while (true)
 			{
 				GameEvent event = mEventQueue.poll();
 				if (event == null)
-					break;
-
-				// Process keys tracking the input context to pass in to later
-				// calls
-				if (event instanceof KeyGameEvent)
 				{
-					// Process the key for affects other then asteroid hits
-					mKeyContext = processKeyEvent((KeyGameEvent) event, mKeyContext);
+					break;
+				}
+
+				// Process keys tracking the input context to pass in to later calls
+				if( event instanceof KeyGameEvent )
+				{
+					framework.input.key.post( ((KeyGameEvent) event).msg );
+				}
+				else if( event instanceof TouchGameEvent )
+				{
+					framework.input.touch.post( ((TouchGameEvent) event).event );
 				}
 			}
 		}
-
-		/**
-		 * This method handles the state updates that can be caused by key press
-		 * events. Key events may mean different things depending on what has
-		 * come before, to support this concept this method takes an opaque
-		 * context object as a parameter and returns an updated version. This
-		 * context should be set to null for the first event then should be set
-		 * to the last value returned for subsequent events.
-		 */
-		protected Object processKeyEvent(KeyGameEvent event, Object context)
+		
+		public void draw()
 		{
-			// Log.d(TAG, "key code is " + event.keyCode + " " + (event.up ?
-			// "up":"down"));
-
-			// If it is a key up on the fire key make sure we mute the
-			// associated sound
-			if (event.up) {
-				if (event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
-					return null;
+			Canvas c = null;
+			try
+			{
+				c = mSurfaceHolder.lockCanvas(null);
+				doDraw(c);
+			} 
+			finally 
+			{
+				if (c != null) 
+				{
+					mSurfaceHolder.unlockCanvasAndPost(c);
 				}
 			}
-			// If it is a key down on the fire key start playing the sound and
-			// update the context
-			// to indicate that a key has been pressed and to ignore further
-			// presses
-			else {
-				if (event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER
-						&& (context == null)) {
-					return event;
-				}
-			}
-
-			// Return the context unchanged
-			return context;
 		}
 
 		/**
@@ -204,18 +154,6 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 		}
 
 		/**
-		 * returns the current int value of game state as defined by state
-		 * tracking constants
-		 * 
-		 * @return
-		 */
-		public int getGameState() {
-			synchronized (mSurfaceHolder) {
-				return mState;
-			}
-		}
-
-		/**
 		 * Sets the game mode. That is, whether we are running, paused, in the
 		 * failure state, in the victory state, etc.
 		 * 
@@ -223,15 +161,14 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 		 * @param mode
 		 *            one of the STATE_* constants
 		 */
-		public void setGameState(int mode) {
-			synchronized (mSurfaceHolder) {
+		public void setGameState(int mode)
+		{
+			synchronized (mSurfaceHolder)
+			{
 				//setGameState(mode, null);
 			}
 		}
 
-		/**
-		 * Add key press input to the GameEvent queue
-		 */
 		public boolean doKeyDown(int keyCode, KeyEvent msg)
 		{
 			mEventQueue.add(new KeyGameEvent(keyCode, false, msg));
@@ -239,12 +176,16 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 			return true;
 		}
 
-		/**
-		 * Add key press input to the GameEvent queue
-		 */
 		public boolean doKeyUp(int keyCode, KeyEvent msg)
 		{
 			mEventQueue.add(new KeyGameEvent(keyCode, true, msg));
+
+			return true;
+		}
+
+		public boolean doTouchEvent(MotionEvent event)
+		{
+			mEventQueue.add(new TouchGameEvent(event));
 
 			return true;
 		}
@@ -270,8 +211,6 @@ public class BlockShooterView extends SurfaceView implements SurfaceHolder.Callb
 		}
 
 	}// end thread class
-
-	public static final String TAG = "BlockShooter";
 
 	/** The thread that actually draws the animation */
 	private BlockShooterThread thread;
