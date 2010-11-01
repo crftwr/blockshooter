@@ -11,7 +11,14 @@ import craftware.blockShooter.BlockShooterView.BlockShooterThread;
 
 public class BlockShooter extends Activity implements View.OnClickListener
 {
-	private BlockShooterThread mBlockShooterThread;
+	static
+	{
+	    System.loadLibrary("hello-jni");
+	}
+
+    public native String stringFromJNI();
+
+    private BlockShooterThread mBlockShooterThread;
 
     private BlockShooterView mBlockShooterView;
 
@@ -20,6 +27,11 @@ public class BlockShooter extends Activity implements View.OnClickListener
     public void onCreate(Bundle savedInstanceState)
     {
     	super.onCreate(savedInstanceState);
+    	
+    	{
+	    	String s = stringFromJNI();
+	    	Log.v("JNI Test",s);
+    	}
 
         setContentView(R.layout.main);
 
